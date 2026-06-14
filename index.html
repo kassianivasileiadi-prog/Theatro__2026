@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σύστημα Κρατήσεων</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .booking-card { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .message { text-align: center; margin-top: 15px; font-weight: bold; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="booking-card">
+    <h2>Κράτηση Θέσης</h2>
+    <form id="bookingForm">
+        <div class="form-group">
+            <label for="name">Όνομα:</label>
+            <input type="text" id="name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="date">Ημερομηνία:</label>
+            <select id="date" required>
+                <option value="" disabled selected>Επιλέξτε ημερομηνία...</option>
+                <option value="20/06/2026">20 Ιουνίου 2026</option>
+                <option value="21/06/2026">21 Ιουνίου 2026</option>
+                <option value="22/06/2026">22 Ιουνίου 2026</option>
+                <option value="23/06/2026">23 Ιουνίου 2026</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="seats">Θέσεις:</label>
+            <input type="number" id="seats" min="1" max="10" value="1" required>
+        </div>
+        
+        <button type="submit" id="submitBtn">Επιβεβαίωση Κράτησης</button>
+    </form>
+    
+    <div id="msg" class="message"></div>
+</div>
+
+<script>
+    // ⚠️ ΑΝΤΙΚΑΤΑΣΤΗΣΕ ΤΟ ΠΑΡΑΚΑΤΩ URL ΜΕ ΤΟ ΔΙΚΟ ΣΟΥ WEB APP URL ΑΠΟ ΤΟ GOOGLE SCRIPT
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbySh2vgCFjlFWCJo6gxP1NMuLRx8Uel4XTbB1xQvZqOrNicyYzsfSAwprU2KoyyvKvn/exec";
+
+    document.getElementById('bookingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const btn = document.getElementById('submitBtn');
+        const msg = document.getElementById('msg');
+        
+        // 🔒 ΚΛΕΙΔΩΜΑ ΚΟΥΜΠΙΟΥ: Απενεργοποίηση αμέσως για αποφυγή διπλοπατήματος
+        btn.disabled = true;
+        btn.innerText = "Γίνεται καταχώρηση...";
+        msg.style.display = "none";
+        
+        const formData = {
+            name: document.getElementById('name').value,
+            email: document.getElementById('email').value,
+            date: document.getElementById('date').value,
+            seats: parseInt(document.getElementById('seats').value)
+        };
+
+        fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(formData)
+        })
+        .then(response => {
+            if (response.ok) {
+                msg.style.color = "green";
+                msg.innerText = "Η κράτηση ολοκληρώθηκε με επιτυχία!";
+                msg.style.display = "block";
+                document.getElementById('bookingForm').reset();
+            } else {
+                throw new Error('Σφάλμα δικτύου ή απόκρισης.');
+            }
+        })
+        .catch(error => {
+            msg.style.color = "red";
+            msg.innerText = "Προέκυψε σφάλμα κατά την καταχώρηση. Δοκιμάστε ξανά.";
+            msg.style.display = "block";
+            console.error(error);
+        })
+        .finally(() => {
+            // 🔓 ΞΕΚΛΕΙΔΩΜΑ ΚΟΥΜΠΙΟΥ: Επανέρχεται μόνο αφού τελειώσει η διαδικασία
+            btn.disabled = false;
+            btn.innerText = "Επιβεβαίωση Κράτησης";
+        });
+    });
+</script>
+
+</body>
+</html>
